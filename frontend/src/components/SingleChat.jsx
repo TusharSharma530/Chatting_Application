@@ -15,7 +15,7 @@ import animationData from "../animations/typing.json";
 import io from "socket.io-client";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
 import { ChatState } from "../context/ChatProvider";
-const ENDPOINT = process.env.REACT_APP_API_URL; // "https://talk-a-tive.herokuapp.com"; -> After deployment
+const ENDPOINT = "https://mern-chat-app-2-l89s.onrender.com/"; // "https://talk-a-tive.herokuapp.com"; -> After deployment
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
@@ -49,11 +49,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       };
 
       setLoading(true);
+
       const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/message/${selectedChat._id}`,
+        `/api/message/${selectedChat._id}`,
         config
       );
-
       setMessages(data);
       setLoading(false);
 
@@ -82,14 +82,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         };
         setNewMessage("");
         const { data } = await axios.post(
-          `${process.env.REACT_APP_API_URL}/api/message`,
+          "/api/message",
           {
             content: newMessage,
             chatId: selectedChat,
           },
           config
         );
-
         socket.emit("new message", data);
         setMessages([...messages, data]);
       } catch (error) {

@@ -6,27 +6,26 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
+  position,
   useToast,
 } from "@chakra-ui/react";
 
 import axios from "axios";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import{useNavigate} from "react-router-dom";
 const Signup = () => {
   const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [confirmPassword, setConfirmPassword] = useState();
-  const [pic, setPic] = useState();
+  const [pic, setpic] = useState();
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
-  const navigate = useNavigate();
-
+  const navigate=useNavigate();
   const postDetails = (pics) => {
     setLoading(true);
-    if (!pics) {
+    if (pics === undefined) {
       toast({
         title: "Please Select an Image",
         status: "warning",
@@ -34,45 +33,37 @@ const Signup = () => {
         isClosable: true,
         position: "top",
       });
-      setLoading(false);
       return;
     }
-
     if (pics.type === "image/jpeg" || pics.type === "image/png") {
       const data = new FormData();
       data.append("file", pics);
       data.append("upload_preset", "CHAT_APP");
       data.append("cloud_name", "dauxzagtc");
-
-      fetch("https://api.cloudinary.com/v1_1/dauxzagtc/image/upload", {
-        method: "POST",
+      fetch(`https://api.cloudinary.com/v1_1/dauxzagtc/image/upload`, {
+        method: "post",
         body: data,
       })
         .then((res) => res.json())
         .then((data) => {
-          setPic(data.url.toString());
+          setpic(data.url.toString());
+          console.log(data.url.toString());
           setLoading(false);
         })
         .catch((err) => {
           console.log(err);
-          toast({
-            title: "Image upload failed",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-            position: "top",
-          });
           setLoading(false);
         });
     } else {
       toast({
-        title: "Please select a JPEG or PNG image",
+        title: "Please select an Image",
         status: "warning",
         duration: 5000,
         isClosable: true,
         position: "top",
       });
       setLoading(false);
+      return;
     }
   };
 
@@ -90,58 +81,44 @@ const Signup = () => {
       return;
     }
 
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords do not match",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "top",
-      });
-      setLoading(false);
-      return;
-    }
-
     try {
       const config = {
-        headers: {
-          "Content-Type": "application/json",
+        Headers: {
+          "content-type": "application/json",
         },
       };
-
       const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/user`,
+        "/api/user",
         { name, email, password, pic },
         config
       );
 
       toast({
-        title: "Registration Successful",
+        title: "Registration Successfull",
         status: "success",
         duration: 5000,
         isClosable: true,
         position: "top",
       });
-
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      localStorage.setItem("userInfo",JSON.stringify(data))
       setLoading(false);
-      navigate("/chats");
+      navigate("/chats")
     } catch (error) {
       toast({
-        title: "Error Occurred",
-        description: error.response?.data?.message || error.message,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top",
-      });
+        title:"Error Occured",
+        description:error.response.data.message,
+        status:"error",
+        duration:5000,
+        isClosable:true,
+        position:"top"
+      })
       setLoading(false);
     }
   };
 
   return (
     <VStack spacing={"5px"}>
-      <FormControl id="name" isRequired>
+      <FormControl id="firstname">
         <FormLabel>Name</FormLabel>
         <Input
           placeholder="Enter Your Name"
@@ -149,15 +126,13 @@ const Signup = () => {
         />
       </FormControl>
 
-      <FormControl id="email" isRequired>
-        <FormLabel>Email</FormLabel>
+      <FormControl id="email">
+        <FormLabel>E-mail</FormLabel>
         <Input
-          type="email"
-          placeholder="Enter Your Email"
+          placeholder="Enter Your E-mail Address"
           onChange={(e) => setEmail(e.target.value)}
         />
       </FormControl>
-
       <FormControl id="password" isRequired>
         <FormLabel>Password</FormLabel>
         <InputGroup size="md">
@@ -173,13 +148,12 @@ const Signup = () => {
           </InputRightElement>
         </InputGroup>
       </FormControl>
-
-      <FormControl id="confirm-password" isRequired>
+      <FormControl id="password" isRequired>
         <FormLabel>Confirm Password</FormLabel>
         <InputGroup size="md">
           <Input
             type={show ? "text" : "password"}
-            placeholder="Confirm Password"
+            placeholder="Confirm password"
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <InputRightElement width="4.5rem">
@@ -189,9 +163,8 @@ const Signup = () => {
           </InputRightElement>
         </InputGroup>
       </FormControl>
-
       <FormControl id="pic">
-        <FormLabel>Upload Your Picture</FormLabel>
+        <FormLabel>Upload your Picture</FormLabel>
         <Input
           type="file"
           p={1.5}
@@ -199,7 +172,6 @@ const Signup = () => {
           onChange={(e) => postDetails(e.target.files[0])}
         />
       </FormControl>
-
       <Button
         colorScheme="blue"
         width="100%"
