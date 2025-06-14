@@ -87,11 +87,11 @@ const Signup = () => {
           "content-type": "application/json",
         },
       };
-      const { data } = await axios.post(
-        "/api/user",
-        { name, email, password, pic },
-        config
-      );
+     const { data } = await axios.post(
+  `${process.env.REACT_APP_API_URL}/api/user`,
+  { name, email, password, pic },
+  config
+);
 
       toast({
         title: "Registration Successfull",

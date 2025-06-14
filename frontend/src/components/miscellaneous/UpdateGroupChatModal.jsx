@@ -73,14 +73,15 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.put(
-        `/api/chat/rename`,
-        {
-          chatId: selectedChat._id,
-          chatName: groupChatName,
-        },
-        config
-      );
+     const { data } = await axios.put(
+  `${process.env.REACT_APP_API_URL}/api/chat/rename`,
+  {
+    chatId: selectedChat._id,
+    chatName: groupChatName,
+  },
+  config
+);
+
 
       console.log(data._id);
       // setSelectedChat("");
@@ -131,14 +132,15 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.put(
-        `/api/chat/groupadd`,
-        {
-          chatId: selectedChat._id,
-          userId: user1._id,
-        },
-        config
-      );
+     const { data } = await axios.put(
+  `${process.env.REACT_APP_API_URL}/api/chat/groupadd`,
+  {
+    chatId: selectedChat._id,
+    userId: user1._id,
+  },
+  config
+);
+
 
       setSelectedChat(data);
       setFetchAgain(!fetchAgain);
@@ -176,14 +178,15 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.put(
-        `/api/chat/groupremove`,
-        {
-          chatId: selectedChat._id,
-          userId: user1._id,
-        },
-        config
-      );
+   const { data } = await axios.put(
+  `${process.env.REACT_APP_API_URL}/api/chat/groupremove`,
+  {
+    chatId: selectedChat._id,
+    userId: user1._id,
+  },
+  config
+);
+
 
       user1._id === user._id ? setSelectedChat() : setSelectedChat(data);
       setFetchAgain(!fetchAgain);
