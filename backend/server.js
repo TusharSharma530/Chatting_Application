@@ -1,28 +1,24 @@
-const express=require("express")
-require("dotenv").config();
-// const cors=require("cors")
-const {chats} =require("./data/data");
+const express = require("express");
+const path = require("path");
+const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-const userRoutes=require("./Routes/userRoutes")
-const chatRoutes=require("./Routes/chatRoutes")
-const messageRoutes=require("./Routes/messageRoutes")
-const path=require("path")
-const {notFound,errorHandler}=require("./middleware/errorMiddleware")
+const userRoutes = require("./Routes/userRoutes");
+const chatRoutes = require("./Routes/chatRoutes");
+const messageRoutes = require("./Routes/messageRoutes");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+
+dotenv.config();
 connectDB();
-const app=express();
-// app.use(cors())
-app.use(express.json()); //to accept json data
-// app.get("/api/chat",(req,res)=>{
-//     res.send(chats)
-// })
 
+const app = express();
+app.use(express.json());
 
-app.use("/api/user",userRoutes)
-app.use('/api/chat',chatRoutes);
-app.use('/api/message',messageRoutes)
+// API Routes
+app.use("/api/user", userRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/message", messageRoutes);
 
-//Error handling routes
-// ----------deploy
+// Deployment Configuration
 const __dirname1 = path.resolve();
 
 if (process.env.NODE_ENV === "production") {
@@ -33,57 +29,53 @@ if (process.env.NODE_ENV === "production") {
   );
 } else {
   app.get("/", (req, res) => {
-    res.send("API is running..");
+    res.send("API is running...");
   });
 }
 
+// Error Handling Middleware
+app.use(notFound);
+app.use(errorHandler);
 
-// ---deploy
+// Start Server
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT}`)
+);
 
-app.use(notFound)
-app.use(errorHandler)
+// --- Socket.IO Setup ---
+const io = require("socket.io")(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: "*", // Adjust in production
+  },
+});
 
-//
+io.on("connection", (socket) => {
+  console.log("🟢 Connected to socket.io");
 
-const PORT=process.env.PORT||5000;
+  socket.on("setup", (userData) => {
+    socket.join(userData._id);
+    socket.emit("connected");
+  });
 
+  socket.on("join chat", (room) => {
+    socket.join(room);
+    console.log(`User joined room: ${room}`);
+  });
 
-// -----socket implementation
-const server = app.listen(PORT,console.log("runnninnnnnng"))
+  socket.on("new message", (newMessageReceived) => {
+    const chat = newMessageReceived.chat;
+    if (!chat.users) return console.log("Chat.users not defined");
 
-const io=require("socket.io")(server,{
-    pingTimeout:60000,
-    cors:{
-        origin:`*`,
-    },
-})
+    chat.users.forEach((user) => {
+      if (user._id === newMessageReceived.sender._id) return;
+      socket.in(user._id).emit("message received", newMessageReceived);
+    });
+  });
 
-io.on("connection",(socket)=>{
-    console.log("connected to socket.io");
-
-    socket.on('setup',(userData)=>{
-        socket.join(userData._id);
-        socket.emit('connected');
-    })
-
-    socket.on('join chat',(room)=>{
-        socket.join(room);
-        
-    })
-    socket.on('new message',(newMessageRecieved)=>{
-        var chat=newMessageRecieved.chat;
-        if(!chat.users) return console.log("chat users not defined")
-
-
-        chat.users.forEach((user)=>{
-            if(user._id==newMessageRecieved.sender._id)return;
-
-            socket.in(user._id).emit("message recieved",newMessageRecieved)
-        })
-    })
-
-    socket.off("setup",()=>{
-        console.log("USEr disconnected");
-        socket.leave(userData._id)
-    })
-})
+  socket.off("setup", () => {
+    console.log("🔴 User disconnected");
+    socket.leave(socket.id);
+  });
+});
