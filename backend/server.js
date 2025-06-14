@@ -13,11 +13,7 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-
-app.use(cors({
-  origin: "https://your-frontend.onrender.com", // or localhost:3000 in dev
-  credentials: true,
-}));
+app.use(cors());
 
 // API Routes
 app.use("/api/user", userRoutes);
