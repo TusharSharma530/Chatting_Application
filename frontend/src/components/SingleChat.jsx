@@ -15,7 +15,7 @@ import animationData from "../animations/typing.json";
 import io from "socket.io-client";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
 import { ChatState } from "../context/ChatProvider";
-const ENDPOINT = "https://chatting-application-2-llq6.onrender.com"; // "https://talk-a-tive.herokuapp.com"; -> After deployment
+const ENDPOINT = process.env.REACT_APP_API_URL; // "https://talk-a-tive.herokuapp.com"; -> After deployment
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
