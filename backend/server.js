@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const path = require("path");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
@@ -12,6 +13,11 @@ connectDB();
 
 const app = express();
 app.use(express.json());
+
+app.use(cors({
+  origin: "https://your-frontend.onrender.com", // or localhost:3000 in dev
+  credentials: true,
+}));
 
 // API Routes
 app.use("/api/user", userRoutes);
